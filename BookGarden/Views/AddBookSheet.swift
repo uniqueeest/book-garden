@@ -11,6 +11,8 @@ import SwiftData
 struct AddBookSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(filter: #Predicate<BookPlant> { $0.statusRaw == "growing" })
+    private var growingBooks: [BookPlant]
 
     @State private var title: String = ""
     @State private var author: String = ""
@@ -22,9 +24,18 @@ struct AddBookSheet: View {
         case title, author, pages
     }
 
+    /// 이미 읽고 있는 책이 있는지 확인
+    private var hasGrowingBook: Bool {
+        !growingBooks.isEmpty
+    }
+
     private var isValid: Bool {
         !title.trimmingCharacters(in: .whitespaces).isEmpty &&
         Int(totalPages) ?? 0 > 0
+    }
+
+    private var canPlant: Bool {
+        isValid && !hasGrowingBook
     }
 
     var body: some View {
@@ -60,13 +71,29 @@ struct AddBookSheet: View {
                     }
                     .padding(.horizontal, AppSpacing.screenPadding)
 
+                    // Warning if already has growing book
+                    if hasGrowingBook {
+                        HStack(spacing: AppSpacing.xs) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(AppColors.flower1)
+                            Text("이미 읽고 있는 책이 있어요.\n먼저 완독한 후 새 책을 심을 수 있어요.")
+                                .font(AppFonts.small())
+                                .foregroundStyle(AppColors.secondary)
+                        }
+                        .padding(AppSpacing.m)
+                        .frame(maxWidth: .infinity)
+                        .background(AppColors.flower1.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: AppRadius.medium))
+                        .padding(.horizontal, AppSpacing.screenPadding)
+                    }
+
                     Spacer()
 
                     // Plant Button
                     PrimaryButton(
                         title: "심기",
                         icon: "leaf.fill",
-                        isEnabled: isValid
+                        isEnabled: canPlant
                     ) {
                         plantBook()
                     }
