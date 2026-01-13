@@ -2,29 +2,19 @@
 //  UserSettings.swift
 //  BookGarden
 //
-//  사용자 설정 (@AppStorage 기반)
+//  사용자 설정 키 상수
+//  각 뷰에서 @AppStorage로 직접 사용
 //
 
-import SwiftUI
+import Foundation
 
-class UserSettings: ObservableObject {
-    static let shared = UserSettings()
-
-    @AppStorage("yearlyGoal") var yearlyGoal: Int = 12
-    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
-
-    private init() {}
+/// AppStorage 키 상수
+enum AppStorageKeys {
+    static let yearlyGoal = "yearlyGoal"
+    static let hasCompletedOnboarding = "hasCompletedOnboarding"
 }
 
-// MARK: - Environment Key
-
-struct UserSettingsKey: EnvironmentKey {
-    static let defaultValue = UserSettings.shared
-}
-
-extension EnvironmentValues {
-    var userSettings: UserSettings {
-        get { self[UserSettingsKey.self] }
-        set { self[UserSettingsKey.self] = newValue }
-    }
+/// 기본값 상수
+enum AppDefaults {
+    static let yearlyGoal = 12
 }

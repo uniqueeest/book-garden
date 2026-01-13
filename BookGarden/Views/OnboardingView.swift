@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @Environment(\.userSettings) private var settings
+    @AppStorage("yearlyGoal") private var yearlyGoal: Int = 12
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @State private var goalText: String = "12"
     @FocusState private var isInputFocused: Bool
 
@@ -96,8 +97,8 @@ struct OnboardingView: View {
                     icon: "arrow.right.circle.fill",
                     isEnabled: isValid
                 ) {
-                    settings.yearlyGoal = goalValue
-                    settings.hasCompletedOnboarding = true
+                    yearlyGoal = goalValue
+                    hasCompletedOnboarding = true
                     onComplete()
                 }
                 .padding(.horizontal, AppSpacing.screenPadding)
@@ -105,7 +106,7 @@ struct OnboardingView: View {
             }
         }
         .onAppear {
-            goalText = String(settings.yearlyGoal)
+            goalText = String(yearlyGoal)
         }
     }
 

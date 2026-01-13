@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct GardenView: View {
-    @Environment(\.userSettings) private var settings
+    @AppStorage("yearlyGoal") private var yearlyGoal: Int = 12
     @Query(
         filter: #Predicate<BookPlant> { $0.statusRaw == "harvested" },
         sort: \BookPlant.harvestedDate,
@@ -37,7 +37,7 @@ struct GardenView: View {
                 // Stats Card
                 StatsCard(
                     harvestedCount: harvestedBooks.count,
-                    yearlyGoal: settings.yearlyGoal
+                    yearlyGoal: yearlyGoal
                 ) {
                     showGoalSheet = true
                 }

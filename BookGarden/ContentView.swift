@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.userSettings) private var settings
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @State private var selectedTab: Tab = .pot
     @State private var showOnboarding: Bool = false
 
@@ -39,7 +39,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            if !settings.hasCompletedOnboarding {
+            if !hasCompletedOnboarding {
                 showOnboarding = true
             }
         }

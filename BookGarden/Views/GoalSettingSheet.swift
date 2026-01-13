@@ -9,13 +9,13 @@ import SwiftUI
 
 struct GoalSettingSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.userSettings) private var settings
+    @AppStorage("yearlyGoal") private var yearlyGoal: Int = 12
 
     @State private var goalText: String = ""
     @FocusState private var isInputFocused: Bool
 
     private var goalValue: Int {
-        Int(goalText) ?? settings.yearlyGoal
+        Int(goalText) ?? yearlyGoal
     }
 
     private var isValid: Bool {
@@ -23,7 +23,7 @@ struct GoalSettingSheet: View {
     }
 
     private var hasChanged: Bool {
-        goalValue != settings.yearlyGoal
+        goalValue != yearlyGoal
     }
 
     var body: some View {
@@ -50,7 +50,7 @@ struct GoalSettingSheet: View {
                         icon: "checkmark.circle.fill",
                         isEnabled: isValid && hasChanged
                     ) {
-                        settings.yearlyGoal = goalValue
+                        yearlyGoal = goalValue
                         dismiss()
                     }
                     .padding(.horizontal, AppSpacing.screenPadding)
@@ -71,7 +71,7 @@ struct GoalSettingSheet: View {
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
         .onAppear {
-            goalText = String(settings.yearlyGoal)
+            goalText = String(yearlyGoal)
         }
     }
 
@@ -83,7 +83,7 @@ struct GoalSettingSheet: View {
                 .font(AppFonts.small())
                 .foregroundStyle(AppColors.secondary)
 
-            Text("\(settings.yearlyGoal)권")
+            Text("\(yearlyGoal)권")
                 .font(AppFonts.h2())
                 .foregroundStyle(AppColors.text)
         }
