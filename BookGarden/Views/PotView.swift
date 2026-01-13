@@ -9,17 +9,27 @@ import SwiftUI
 import SwiftData
 
 struct PotView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.userSettings) private var settings
+    @AppStorage("yearlyGoal") private var yearlyGoal: Int = 12
     @Query(filter: #Predicate<BookPlant> { $0.statusRaw == "growing" })
     private var growingBooks: [BookPlant]
+    @Query(filter: #Predicate<BookPlant> { $0.statusRaw == "harvested" })
+    private var harvestedBooks: [BookPlant]
 
     @State private var showAddBookSheet = false
     @State private var showWateringSheet = false
-    @State private var harvestedBooksCount: Int = 0
 
     var currentBook: BookPlant? {
         growingBooks.first
+    }
+
+    /// 올해 수확한 책 수 (자동 갱신)
+    private var harvestedThisYear: Int {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        return harvestedBooks.filter { book in
+            guard let date = book.harvestedDate else { return false }
+            return calendar.component(.year, from: date) == currentYear
+        }.count
     }
 
     var body: some View {
@@ -51,16 +61,13 @@ struct PotView: View {
                 WateringSheet(book: book)
             }
         }
-        .task {
-            await updateHarvestedCount()
-        }
     }
 
     // MARK: - Header
 
     private var headerView: some View {
         HStack {
-            Text("올해의 농사: \(harvestedBooksCount)/\(settings.yearlyGoal)권")
+            Text("올해의 농사: \(harvestedThisYear)/\(yearlyGoal)권")
                 .font(AppFonts.h3())
                 .foregroundStyle(AppColors.text)
 
@@ -121,33 +128,6 @@ struct PotView: View {
         }
     }
 
-    // MARK: - Helper Methods
-
-    @MainActor
-    private func updateHarvestedCount() async {
-        let calendar = Calendar.current
-        let year = calendar.component(.year, from: Date())
-
-        guard let startOfYear = calendar.date(from: DateComponents(year: year, month: 1, day: 1)) else {
-            harvestedBooksCount = 0
-            return
-        }
-
-        let descriptor = FetchDescriptor<BookPlant>(
-            predicate: #Predicate<BookPlant> {
-                $0.statusRaw == "harvested" &&
-                $0.harvestedDate != nil &&
-                $0.harvestedDate! >= startOfYear
-            }
-        )
-
-        do {
-            let count = try modelContext.fetchCount(descriptor)
-            harvestedBooksCount = count
-        } catch {
-            harvestedBooksCount = 0
-        }
-    }
 }
 
 // MARK: - Preview
