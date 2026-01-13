@@ -1,5 +1,6 @@
 # Claude
 .claude/
+.mcp.json
 
 # Xcode
 build/

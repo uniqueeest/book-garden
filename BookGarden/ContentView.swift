@@ -2,54 +2,45 @@
 //  ContentView.swift
 //  BookGarden
 //
-//  Created by 최윤재 on 1/13/26.
+//  메인 TabView: 화분 / 정원 + 온보딩
 //
 
 import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Environment(\.userSettings) private var settings
+    @State private var selectedTab: Tab = .pot
+    @State private var showOnboarding: Bool = false
+
+    enum Tab {
+        case pot
+        case garden
+    }
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        TabView(selection: $selectedTab) {
+            PotView()
+                .tag(Tab.pot)
+                .tabItem {
+                    Label("화분", systemImage: selectedTab == .pot ? "leaf.fill" : "leaf")
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+            GardenView()
+                .tag(Tab.garden)
+                .tabItem {
+                    Label("정원", systemImage: selectedTab == .garden ? "tree.fill" : "tree")
+                }
         }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+        .tint(AppColors.primary)
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView {
+                showOnboarding = false
+            }
+        }
+        .onAppear {
+            if !settings.hasCompletedOnboarding {
+                showOnboarding = true
             }
         }
     }
@@ -57,5 +48,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: BookPlant.self, inMemory: true)
 }
