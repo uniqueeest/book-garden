@@ -13,17 +13,25 @@ struct PlantView: View {
     var showBadge: Bool = false
     var progress: Int = 0
 
+    @State private var isAnimating = false
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             // Plant Container
             VStack {
                 Spacer()
 
-                // Plant Icon
+                // Plant Icon with gentle animation
                 Image(systemName: stage.symbolName)
                     .font(.system(size: size * 0.5))
                     .foregroundStyle(plantColor)
                     .symbolRenderingMode(.hierarchical)
+                    .scaleEffect(isAnimating ? 1.05 : 1.0)
+                    .animation(
+                        .easeInOut(duration: 2.0)
+                        .repeatForever(autoreverses: true),
+                        value: isAnimating
+                    )
 
                 // Pot
                 PotShape()
@@ -40,6 +48,12 @@ struct PlantView: View {
             if showBadge && progress > 0 {
                 ProgressBadge(progress: progress)
                     .offset(x: -AppSpacing.m, y: AppSpacing.m)
+            }
+        }
+        .onAppear {
+            // 빈 화분이 아닐 때만 애니메이션 시작
+            if stage != .empty {
+                isAnimating = true
             }
         }
     }
