@@ -13,8 +13,13 @@ struct PrimaryButton: View {
     var isEnabled: Bool = true
     let action: () -> Void
 
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+
     var body: some View {
-        Button(action: action) {
+        Button {
+            impactFeedback.impactOccurred()
+            action()
+        } label: {
             HStack(spacing: AppSpacing.xs) {
                 Image(systemName: icon)
                     .font(.system(size: 20))

@@ -163,7 +163,10 @@ struct WateringSheet: View {
     }
 
     private func quickButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            action()
+        } label: {
             Text(title)
                 .font(AppFonts.small())
                 .foregroundStyle(AppColors.primary)

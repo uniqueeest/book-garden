@@ -19,7 +19,9 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: $selectedTab.onChange { _ in
+            UISelectionFeedbackGenerator().selectionChanged()
+        }) {
             PotView()
                 .tag(Tab.pot)
                 .tabItem {
@@ -43,6 +45,20 @@ struct ContentView: View {
                 showOnboarding = true
             }
         }
+    }
+}
+
+// MARK: - Binding Extension for onChange
+
+extension Binding {
+    func onChange(_ handler: @escaping (Value) -> Void) -> Binding<Value> {
+        Binding(
+            get: { self.wrappedValue },
+            set: { newValue in
+                self.wrappedValue = newValue
+                handler(newValue)
+            }
+        )
     }
 }
 
