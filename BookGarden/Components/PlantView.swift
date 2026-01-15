@@ -18,7 +18,7 @@ struct PlantView: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             // Plant Container
-            VStack {
+            VStack(spacing: 0) {
                 Spacer()
 
                 // Plant Icon with gentle animation
