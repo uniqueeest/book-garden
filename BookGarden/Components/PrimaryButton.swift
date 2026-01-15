@@ -13,9 +13,11 @@ struct PrimaryButton: View {
     var isEnabled: Bool = true
     let action: () -> Void
 
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+
     var body: some View {
         Button {
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            impactFeedback.impactOccurred()
             action()
         } label: {
             HStack(spacing: AppSpacing.xs) {

@@ -26,7 +26,7 @@ struct PlantView: View {
                     .font(.system(size: size * 0.5))
                     .foregroundStyle(plantColor)
                     .symbolRenderingMode(.hierarchical)
-                    .scaleEffect(isAnimating ? 1.05 : 1.0)
+                    .scaleEffect(stage != .empty && isAnimating ? 1.05 : 1.0)
                     .animation(
                         .easeInOut(duration: 2.0)
                         .repeatForever(autoreverses: true),
