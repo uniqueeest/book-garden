@@ -50,11 +50,8 @@ struct PlantView: View {
                     .offset(x: -AppSpacing.m, y: AppSpacing.m)
             }
         }
-        .onAppear {
-            // 빈 화분이 아닐 때만 애니메이션 시작
-            if stage != .empty {
-                isAnimating = true
-            }
+        .task(id: stage) {
+            isAnimating = (stage != .empty)
         }
     }
 

@@ -49,10 +49,8 @@ enum GrowthStage: String, CaseIterable {
 
     static func from(progress: Double) -> GrowthStage {
         switch progress {
-        case ..<0.01:
-            return .seed       // 0% ~ 1% 미만: 씨앗 (방금 심음)
-        case 0.01..<0.2:
-            return .seed       // 1% ~ 20%: 씨앗
+        case ..<0.2:
+            return .seed       // 0% ~ 20% 미만: 씨앗
         case 0.2..<0.4:
             return .sprout     // 20% ~ 40%: 새싹
         case 0.4..<0.6:
