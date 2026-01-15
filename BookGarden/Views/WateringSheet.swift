@@ -16,6 +16,8 @@ struct WateringSheet: View {
     @State private var showHarvestAlert = false
     @FocusState private var isInputFocused: Bool
 
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+
     private var newPageInt: Int {
         Int(newPage) ?? book.currentPage
     }
@@ -163,7 +165,10 @@ struct WateringSheet: View {
     }
 
     private func quickButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button {
+            impactFeedback.impactOccurred()
+            action()
+        } label: {
             Text(title)
                 .font(AppFonts.small())
                 .foregroundStyle(AppColors.primary)

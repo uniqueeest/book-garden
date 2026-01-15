@@ -15,6 +15,8 @@ struct OnboardingView: View {
 
     var onComplete: () -> Void
 
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+
     private var goalValue: Int {
         Int(goalText) ?? 12
     }
@@ -113,7 +115,10 @@ struct OnboardingView: View {
     // MARK: - Quick Button
 
     private func quickButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button {
+            impactFeedback.impactOccurred()
+            action()
+        } label: {
             Text(title)
                 .font(AppFonts.small())
                 .foregroundStyle(AppColors.primary)

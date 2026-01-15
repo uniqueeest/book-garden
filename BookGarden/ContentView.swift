@@ -13,6 +13,8 @@ struct ContentView: View {
     @State private var selectedTab: Tab = .pot
     @State private var showOnboarding: Bool = false
 
+    private let selectionFeedback = UISelectionFeedbackGenerator()
+
     enum Tab {
         case pot
         case garden
@@ -33,6 +35,9 @@ struct ContentView: View {
                 }
         }
         .tint(AppColors.primary)
+        .onChange(of: selectedTab) {
+            selectionFeedback.selectionChanged()
+        }
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView {
                 showOnboarding = false
