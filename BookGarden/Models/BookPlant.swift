@@ -36,6 +36,17 @@ enum GrowthStage: String, CaseIterable {
         }
     }
 
+    var assetName: String {
+        switch self {
+        case .empty: return "PlantEmpty"
+        case .seed: return "PlantSprout"
+        case .sprout: return "PlantSprout"
+        case .growing: return "PlantGrowing"
+        case .flowering: return "PlantGrowing"
+        case .mature: return "PlantFlower"
+        }
+    }
+
     var displayName: String {
         switch self {
         case .empty: return "빈 화분"
@@ -49,16 +60,18 @@ enum GrowthStage: String, CaseIterable {
 
     static func from(progress: Double) -> GrowthStage {
         switch progress {
+        case ..<0.0000001:
+            return .empty      // 0%: 빈 화분
         case ..<0.2:
             return .seed       // 0% ~ 20% 미만: 씨앗
         case 0.2..<0.4:
             return .sprout     // 20% ~ 40%: 새싹
         case 0.4..<0.6:
             return .growing    // 40% ~ 60%: 성장 중
-        case 0.6..<0.8:
-            return .flowering  // 60% ~ 80%: 꽃봉오리
+        case 0.6..<1.0:
+            return .flowering  // 60% ~ 100% 미만: 꽃봉오리
         default:
-            return .mature     // 80% ~ 100%: 만개
+            return .mature     // 100%: 만개
         }
     }
 }

@@ -103,6 +103,9 @@ struct AddBookSheet: View {
             }
             .navigationTitle("씨앗 심기")
             .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .top) {
+                Color.clear.frame(height: AppSpacing.xxl)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("취소") {

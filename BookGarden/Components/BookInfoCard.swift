@@ -11,26 +11,20 @@ struct BookInfoCard: View {
     let book: BookPlant
 
     var body: some View {
-        HStack(spacing: AppSpacing.m) {
-            // Book Cover Placeholder
-            BookCoverView(coverUrl: book.coverUrl)
+        VStack(alignment: .leading, spacing: AppSpacing.xs) {
+            Text(book.title)
+                .font(AppFonts.body())
+                .foregroundStyle(AppColors.text)
+                .lineLimit(2)
 
-            // Book Info
-            VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                Text(book.title)
-                    .font(AppFonts.body())
-                    .foregroundStyle(AppColors.text)
-                    .lineLimit(2)
+            Text("\(book.currentPage) / \(book.totalPage) 페이지")
+                .font(AppFonts.small())
+                .foregroundStyle(AppColors.secondary)
 
-                Text("\(book.currentPage) / \(book.totalPage) 페이지")
-                    .font(AppFonts.small())
-                    .foregroundStyle(AppColors.secondary)
+            Spacer()
 
-                Spacer()
-
-                // Progress Bar
-                ProgressBarView(progress: book.progress)
-            }
+            // Progress Bar
+            ProgressBarView(progress: book.progress)
         }
         .padding(AppSpacing.l)
         .background(AppColors.white)
@@ -62,12 +56,10 @@ struct BookCoverView: View {
 
     private var placeholderCover: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: AppRadius.small)
-                .fill(AppColors.gray200)
-
-            Image(systemName: "book.closed.fill")
-                .font(.system(size: 24))
-                .foregroundStyle(AppColors.secondary)
+            Image("BookCover")
+                .resizable()
+                .scaledToFit()
+                .padding(AppSpacing.xs)
         }
     }
 }

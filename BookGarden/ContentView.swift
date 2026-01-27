@@ -10,26 +10,21 @@ import SwiftData
 
 struct ContentView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-    @State private var selectedTab: Tab = .pot
+    @State private var selectedTab: AppTab = .pot
     @State private var showOnboarding: Bool = false
 
     private let selectionFeedback = UISelectionFeedbackGenerator()
 
-    enum Tab {
-        case pot
-        case garden
-    }
-
     var body: some View {
         TabView(selection: $selectedTab) {
-            PotView()
-                .tag(Tab.pot)
+            PotView(selectedTab: $selectedTab)
+                .tag(AppTab.pot)
                 .tabItem {
                     Label("화분", systemImage: selectedTab == .pot ? "leaf.fill" : "leaf")
                 }
 
             GardenView()
-                .tag(Tab.garden)
+                .tag(AppTab.garden)
                 .tabItem {
                     Label("정원", systemImage: selectedTab == .garden ? "tree.fill" : "tree")
                 }
