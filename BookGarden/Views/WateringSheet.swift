@@ -7,16 +7,20 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct WateringSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var book: BookPlant
+    @AppStorage("lastHarvestedID") private var lastHarvestedID: String = ""
 
     @State private var newPage: String = ""
     @State private var showHarvestAlert = false
     @FocusState private var isInputFocused: Bool
 
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+    private let stageFeedback = UIImpactFeedbackGenerator(style: .medium)
+    private let completionFeedback = UINotificationFeedbackGenerator()
 
     private var newPageInt: Int {
         Int(newPage) ?? book.currentPage
@@ -55,10 +59,12 @@ struct WateringSheet: View {
                         icon: willComplete ? "checkmark.circle.fill" : "drop.fill",
                         isEnabled: isValid
                     ) {
+                        stageFeedback.prepare()
+                        completionFeedback.prepare()
                         if willComplete {
                             showHarvestAlert = true
                         } else {
-                            book.updateProgress(to: newPageInt)
+                            recordProgress(to: newPageInt, isCompletion: false)
                             dismiss()
                         }
                     }
@@ -68,6 +74,9 @@ struct WateringSheet: View {
             }
             .navigationTitle("물주기")
             .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .top) {
+                Color.clear.frame(height: AppSpacing.xxl)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("취소") {
@@ -84,7 +93,7 @@ struct WateringSheet: View {
         }
         .alert("축하해요!", isPresented: $showHarvestAlert) {
             Button("확인") {
-                book.updateProgress(to: book.totalPage)
+                recordProgress(to: book.totalPage, isCompletion: true)
                 dismiss()
             }
         } message: {
@@ -183,6 +192,19 @@ struct WateringSheet: View {
         let current = Int(newPage) ?? book.currentPage
         let newValue = min(current + count, book.totalPage)
         newPage = String(newValue)
+    }
+
+    private func recordProgress(to page: Int, isCompletion: Bool) {
+        let previousStage = book.growthStage
+        book.updateProgress(to: page)
+        let newStage = book.growthStage
+
+        if isCompletion {
+            completionFeedback.notificationOccurred(.success)
+            lastHarvestedID = book.id.uuidString
+        } else if newStage != previousStage {
+            stageFeedback.impactOccurred()
+        }
     }
 
 }

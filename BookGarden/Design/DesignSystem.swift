@@ -107,10 +107,10 @@ struct AppSizes {
     static let plantDisplaySmall: CGFloat = 100
 
     // Book covers
-    static let bookCoverWidth: CGFloat = 64
-    static let bookCoverHeight: CGFloat = 80
-    static let bookCoverListWidth: CGFloat = 56
-    static let bookCoverListHeight: CGFloat = 80
+    static let bookCoverWidth: CGFloat = 72
+    static let bookCoverHeight: CGFloat = 96
+    static let bookCoverListWidth: CGFloat = 72
+    static let bookCoverListHeight: CGFloat = 96
 
     // Buttons
     static let buttonHeight: CGFloat = 60

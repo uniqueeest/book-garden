@@ -10,6 +10,7 @@ import SwiftData
 
 struct GardenView: View {
     @AppStorage("yearlyGoal") private var yearlyGoal: Int = 12
+    @AppStorage("lastHarvestedID") private var lastHarvestedID: String = ""
     @Query(
         filter: #Predicate<BookPlant> { $0.statusRaw == "harvested" },
         sort: \BookPlant.harvestedDate,
@@ -18,6 +19,7 @@ struct GardenView: View {
     private var harvestedBooks: [BookPlant]
 
     @State private var showGoalSheet = false
+    @State private var clearHighlightTask: Task<Void, Never>?
 
     private let columns = [
         GridItem(.flexible()),
@@ -96,11 +98,27 @@ struct GardenView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: AppSpacing.m) {
                 ForEach(harvestedBooks) { book in
-                    GardenItemView(book: book)
+                    GardenItemView(
+                        book: book,
+                        isHighlighted: book.id.uuidString == lastHarvestedID
+                    )
+                    .transition(.scale.combined(with: .opacity))
                 }
             }
             .padding(.horizontal, AppSpacing.screenPadding)
             .padding(.bottom, AppSpacing.xxl)
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: harvestedBooks.count)
+        .onChange(of: harvestedBooks.count) { _, _ in
+            let currentID = lastHarvestedID
+            guard !currentID.isEmpty else { return }
+            clearHighlightTask?.cancel()
+            clearHighlightTask = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 1_400_000_000)
+                if lastHarvestedID == currentID {
+                    lastHarvestedID = ""
+                }
+            }
         }
     }
 }
@@ -109,17 +127,14 @@ struct GardenView: View {
 
 struct GardenItemView: View {
     let book: BookPlant
+    let isHighlighted: Bool
+    @State private var pulse = false
 
     var body: some View {
         VStack(spacing: AppSpacing.xs) {
             // Plant with book cover overlay
             ZStack(alignment: .bottom) {
                 SmallPlantView(stage: .mature)
-
-                // Mini book cover
-                SmallBookCoverView(coverUrl: book.coverUrl)
-                    .scaleEffect(0.5)
-                    .offset(y: 10)
             }
 
             // Book title
@@ -134,6 +149,19 @@ struct GardenItemView: View {
                 Text(date, format: .dateTime.month().day())
                     .font(AppFonts.tiny())
                     .foregroundStyle(AppColors.secondary)
+            }
+        }
+        .scaleEffect(pulse ? 1.06 : 1.0)
+        .overlay(
+            RoundedRectangle(cornerRadius: AppRadius.medium)
+                .stroke(AppColors.primary.opacity(pulse ? 0.5 : 0), lineWidth: 2)
+        )
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: pulse)
+        .onAppear {
+            guard isHighlighted else { return }
+            pulse = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                pulse = false
             }
         }
     }

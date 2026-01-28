@@ -10,13 +10,22 @@ import SwiftData
 
 struct PotView: View {
     @AppStorage("yearlyGoal") private var yearlyGoal: Int = 12
+    @Binding var selectedTab: AppTab
     @Query(filter: #Predicate<BookPlant> { $0.statusRaw == "growing" })
     private var growingBooks: [BookPlant]
-    @Query(filter: #Predicate<BookPlant> { $0.statusRaw == "harvested" })
+    @Query(
+        filter: #Predicate<BookPlant> { $0.statusRaw == "harvested" },
+        sort: \BookPlant.harvestedDate,
+        order: .reverse
+    )
     private var harvestedBooks: [BookPlant]
 
     @State private var showAddBookSheet = false
     @State private var showWateringSheet = false
+    @State private var showHarvestToast = false
+    @State private var harvestToastTitle = ""
+    @State private var previousHarvestCount = 0
+    @State private var hideHarvestToastTask: Task<Void, Never>?
 
     var currentBook: BookPlant? {
         growingBooks.first
@@ -52,6 +61,12 @@ struct PotView: View {
                 Spacer()
             }
             .padding(.horizontal, AppSpacing.screenPadding)
+
+            if showHarvestToast {
+                harvestToastView
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(1)
+            }
         }
         .sheet(isPresented: $showAddBookSheet) {
             AddBookSheet()
@@ -59,6 +74,32 @@ struct PotView: View {
         .sheet(isPresented: $showWateringSheet) {
             if let book = currentBook {
                 WateringSheet(book: book)
+            }
+        }
+        .onAppear {
+            previousHarvestCount = harvestedBooks.count
+        }
+        .onChange(of: harvestedBooks.count) { _, newValue in
+            guard newValue > previousHarvestCount else {
+                previousHarvestCount = newValue
+                return
+            }
+
+            let currentToastTitle = harvestedBooks.first?.title ?? "책"
+            harvestToastTitle = currentToastTitle
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                showHarvestToast = true
+            }
+
+            previousHarvestCount = newValue
+            hideHarvestToastTask?.cancel()
+            hideHarvestToastTask = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 1_600_000_000)
+                if harvestToastTitle == currentToastTitle {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        showHarvestToast = false
+                    }
+                }
             }
         }
     }
@@ -128,12 +169,49 @@ struct PotView: View {
         }
     }
 
+    // MARK: - Harvest Toast
+
+    private var harvestToastView: some View {
+        VStack {
+            Spacer()
+
+            HStack(spacing: AppSpacing.m) {
+                SmallPlantView(stage: .mature)
+                    .frame(width: 44, height: 44)
+
+                VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                    Text("수확 완료")
+                        .font(AppFonts.small())
+                        .foregroundStyle(AppColors.secondary)
+                    Text("'\(harvestToastTitle)'이(가) 정원에 옮겨졌어요")
+                        .font(AppFonts.body())
+                        .foregroundStyle(AppColors.text)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+
+                Button("정원 보기") {
+                    selectedTab = .garden
+                }
+                .font(AppFonts.small())
+                .foregroundStyle(AppColors.primary)
+            }
+            .padding(AppSpacing.m)
+            .background(AppColors.white)
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.large))
+            .softShadow()
+            .padding(.horizontal, AppSpacing.screenPadding)
+            .padding(.bottom, AppSpacing.xl)
+        }
+    }
+
 }
 
 // MARK: - Preview
 
 #Preview("Empty State") {
-    PotView()
+    PotView(selectedTab: .constant(.pot))
         .modelContainer(for: BookPlant.self, inMemory: true)
 }
 
@@ -149,6 +227,6 @@ struct PotView: View {
     )
     container.mainContext.insert(book)
 
-    return PotView()
+    return PotView(selectedTab: .constant(.pot))
         .modelContainer(container)
 }

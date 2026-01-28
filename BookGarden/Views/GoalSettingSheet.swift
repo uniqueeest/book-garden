@@ -59,6 +59,9 @@ struct GoalSettingSheet: View {
             }
             .navigationTitle("목표 수정")
             .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .top) {
+                Color.clear.frame(height: AppSpacing.xxl)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("취소") {

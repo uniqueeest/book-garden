@@ -12,37 +12,36 @@ struct PlantView: View {
     var size: CGFloat = AppSizes.plantDisplaySize
     var showBadge: Bool = false
     var progress: Int = 0
+    var fillFrame: Bool = false
 
     @State private var isAnimating = false
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            // Plant Container
-            VStack(spacing: 0) {
-                Spacer()
-
-                // Plant Icon with gentle animation
-                Image(systemName: stage.symbolName)
-                    .font(.system(size: size * 0.5))
-                    .foregroundStyle(plantColor)
-                    .symbolRenderingMode(.hierarchical)
-                    .scaleEffect(stage != .empty && isAnimating ? 1.05 : 1.0)
-                    .animation(
-                        .easeInOut(duration: 2.0)
-                        .repeatForever(autoreverses: true),
-                        value: isAnimating
-                    )
-
-                // Pot
-                PotShape()
-                    .fill(AppColors.potBody)
-                    .frame(width: size * 0.4, height: size * 0.25)
-                    .overlay(
-                        PotShape()
-                            .stroke(AppColors.potRim, lineWidth: 2)
-                    )
+            Group {
+                if fillFrame {
+                    Image(stage.assetName)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: size, height: size)
+                        .clipped()
+                } else {
+                    Image(stage.assetName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: size, height: size)
+                }
             }
-            .frame(width: size, height: size)
+            .scaleEffect(stage != .empty && isAnimating ? 1.03 : 1.0)
+            .offset(y: stage != .empty && isAnimating ? -2 : 0)
+            .animation(
+                .easeInOut(duration: 2.0)
+                    .repeatForever(autoreverses: true),
+                value: isAnimating
+            )
+            .id(stage)
+            .transition(.opacity.combined(with: .scale))
+            .animation(.easeInOut(duration: 0.25), value: stage)
 
             // Progress Badge
             if showBadge && progress > 0 {
@@ -53,51 +52,6 @@ struct PlantView: View {
         .task(id: stage) {
             isAnimating = (stage != .empty)
         }
-    }
-
-    private var plantColor: Color {
-        switch stage {
-        case .empty:
-            return AppColors.gray300
-        case .seed, .sprout:
-            return AppColors.leaf3
-        case .growing:
-            return AppColors.leaf1
-        case .flowering:
-            return AppColors.flower1
-        case .mature:
-            return AppColors.primary
-        }
-    }
-}
-
-// MARK: - Pot Shape
-
-struct PotShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-
-        let topWidth = rect.width
-        let bottomWidth = rect.width * 0.7
-        let rimHeight = rect.height * 0.15
-
-        // Rim
-        path.addRoundedRect(
-            in: CGRect(x: 0, y: 0, width: topWidth, height: rimHeight),
-            cornerSize: CGSize(width: 4, height: 4)
-        )
-
-        // Body (trapezoid)
-        let bodyTop = rimHeight
-        let inset = (topWidth - bottomWidth) / 2
-
-        path.move(to: CGPoint(x: inset * 0.3, y: bodyTop))
-        path.addLine(to: CGPoint(x: topWidth - inset * 0.3, y: bodyTop))
-        path.addLine(to: CGPoint(x: topWidth - inset, y: rect.height))
-        path.addLine(to: CGPoint(x: inset, y: rect.height))
-        path.closeSubpath()
-
-        return path
     }
 }
 
@@ -127,7 +81,8 @@ struct SmallPlantView: View {
         PlantView(
             stage: stage,
             size: AppSizes.plantDisplaySmall,
-            showBadge: false
+            showBadge: false,
+            fillFrame: true
         )
     }
 }
