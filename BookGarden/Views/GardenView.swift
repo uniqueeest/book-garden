@@ -28,31 +28,28 @@ struct GardenView: View {
     ]
 
     var body: some View {
-        ZStack {
-            AppColors.background
-                .ignoresSafeArea()
+        VStack(spacing: 0) {
+            // Header
+            headerView
 
-            VStack(spacing: 0) {
-                // Header
-                headerView
+            // Stats Card
+            StatsCard(
+                harvestedCount: harvestedBooks.count,
+                yearlyGoal: yearlyGoal
+            ) {
+                showGoalSheet = true
+            }
+            .padding(.horizontal, AppSpacing.screenPadding)
+            .padding(.bottom, AppSpacing.m)
 
-                // Stats Card
-                StatsCard(
-                    harvestedCount: harvestedBooks.count,
-                    yearlyGoal: yearlyGoal
-                ) {
-                    showGoalSheet = true
-                }
-                .padding(.horizontal, AppSpacing.screenPadding)
-                .padding(.bottom, AppSpacing.m)
-
-                if harvestedBooks.isEmpty {
-                    emptyStateView
-                } else {
-                    gridView
-                }
+            if harvestedBooks.isEmpty {
+                emptyStateView
+            } else {
+                gridView
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AppColors.background.ignoresSafeArea())
         .sheet(isPresented: $showGoalSheet) {
             GoalSettingSheet()
         }
@@ -152,10 +149,6 @@ struct GardenItemView: View {
             }
         }
         .scaleEffect(pulse ? 1.06 : 1.0)
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.medium)
-                .stroke(AppColors.primary.opacity(pulse ? 0.5 : 0), lineWidth: 2)
-        )
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: pulse)
         .onAppear {
             guard isHighlighted else { return }

@@ -104,6 +104,7 @@ struct GoalSettingSheet: View {
             HStack(spacing: AppSpacing.s) {
                 TextField("", text: $goalText)
                     .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .foregroundStyle(AppColors.text)
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.center)
                     .focused($isInputFocused)
