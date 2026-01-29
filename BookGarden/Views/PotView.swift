@@ -43,9 +43,6 @@ struct PotView: View {
 
     var body: some View {
         ZStack {
-            AppColors.background
-                .ignoresSafeArea()
-
             VStack(spacing: 0) {
                 // Header
                 headerView
@@ -68,6 +65,8 @@ struct PotView: View {
                     .zIndex(1)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AppColors.background.ignoresSafeArea())
         .sheet(isPresented: $showAddBookSheet) {
             AddBookSheet()
         }

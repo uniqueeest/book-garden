@@ -131,6 +131,7 @@ struct WateringSheet: View {
             HStack(spacing: AppSpacing.s) {
                 TextField("", text: $newPage)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundStyle(AppColors.text)
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.center)
                     .focused($isInputFocused)

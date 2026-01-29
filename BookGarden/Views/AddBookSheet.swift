@@ -135,6 +135,7 @@ struct AddBookSheet: View {
 
             TextField(placeholder, text: text)
                 .font(AppFonts.body())
+                .foregroundStyle(AppColors.text)
                 .keyboardType(keyboardType)
                 .focused($focusedField, equals: field)
                 .padding(AppSpacing.m)
